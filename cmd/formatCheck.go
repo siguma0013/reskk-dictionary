@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"siguma0013/reskk-dictionary/internal/entry"
 )
 
 var formatCheckCmd = &cobra.Command{
@@ -92,12 +94,6 @@ func init() {
 	rootCmd.AddCommand(formatCheckCmd)
 }
 
-// Record 辞書ファイルの構造定義
-type Record struct {
-	Key   string   `json:"key"`
-	Value []string `json:"value"`
-}
-
 // validateJSONL 辞書ファイルのフォーマットチェック本体
 func validateJSONL(reader io.Reader) []error {
 	scanner := bufio.NewScanner(reader)
@@ -126,7 +122,7 @@ func validateJSONL(reader io.Reader) []error {
 		decoder := json.NewDecoder(strings.NewReader(line))
 		decoder.DisallowUnknownFields()
 
-		var record Record
+		var record entry.Entry
 
 		if decodeError := decoder.Decode(&record); decodeError != nil {
 			errors = append(errors, fmt.Errorf("line %d: schema error", lineCount))
