@@ -47,3 +47,28 @@ func TestCompareKeys(t *testing.T) {
 		t.Fatalf("expected \"き\" < \"きゃ\"")
 	}
 }
+
+func TestSortData(t *testing.T) {
+	order := buildOrderMap()
+
+	reader := strings.NewReader(strings.Join([]string{
+		`{"key":"きのう","value":["機能"]}`,
+		`{"key":"あき","value":["秋"]}`,
+		`{"key":"あい","value":["愛"]}`,
+	}, "\n"))
+
+	sorted, _ := sortData(reader, order)
+
+	if len(sorted) != 3 {
+		t.Fatalf("expected 3 records, got %d", len(sorted))
+	}
+
+	expectedKeys := []string{"あい", "あき", "きのう"}
+
+	for i, e := range sorted {
+		if e.Key != expectedKeys[i] {
+			t.Fatalf("expected key %q at index %d, got %q", expectedKeys[i], i, e.Key)
+		}
+	}
+
+}
