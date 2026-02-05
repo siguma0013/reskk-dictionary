@@ -138,6 +138,13 @@ func validateJSONL(reader io.Reader) []error {
 		// valueの有無
 		if len(record.Value) == 0 {
 			errors = append(errors, fmt.Errorf("line %d: empty value", lineCount))
+			continue
+		}
+
+		for _, rule := range entry.FormatRules {
+			if rule.Regexp.MatchString(line) {
+				errors = append(errors, fmt.Errorf("line %d: %v", lineCount, rule.Message))
+			}
 		}
 	}
 
