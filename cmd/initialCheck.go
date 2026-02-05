@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"siguma0013/reskk-dictionary/internal/entry"
@@ -31,78 +30,47 @@ to quickly create a Cobra application.`,
 		filePath := args[0]
 		flagError := false
 
-		walkError := filepath.WalkDir(filePath, func(path string, d fs.DirEntry, err error) error {
-			// WalkDir からのエラーはそのまま返す
-			if err != nil {
-				return err
-			}
-
-			// ディレクトリはスキップ
-			if d.IsDir() {
-				return nil
-			}
-
-			// 拡張子jsonl以外はスキップ
-			if !strings.HasSuffix(d.Name(), "jsonl") {
-				return nil
-			}
-
+		results, walkErr := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
 			// 相対パスの取得
 			rel, err := filepath.Rel(filePath, path)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			// 階層が1つ下のものだけ対象
 			parts := strings.Split(rel, string(os.PathSeparator))
 			if len(parts) != 2 {
-				return nil
+				return nil, nil // 対象外
 			}
 
-			allowInitial, ok := allowInitials[d.Name()]
+			allowInitial, ok := allowInitials[filepath.Base(path)]
 			if !ok {
-				fmt.Fprintf(os.Stderr, "contains disallow filename: %v\n", path)
-				flagError = true
-				return nil
+				return []error{fmt.Errorf("contains disallow filename: %v", path)}, nil
 			}
 
-			// ファイルオープン
-			file, fileError := os.Open(path)
-
-			// ファイルオープン失敗はログ出力してスキップ
-			if fileError != nil {
-				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", path, fileError)
-				flagError = true
-				return nil
-			}
-
-			// 関数終了時にファイルクローズ
-			defer file.Close()
-
-			// 頭文字チェック
-			initialsErrors := checkInitials(file, allowInitial)
-
-			// エラーがなければスキップ
-			if len(initialsErrors) == 0 {
-				return nil
-			}
-
-			// フラグ建て
-			flagError = true
-
-			// エラーファイル名、エラー数の出力
-			fmt.Fprintf(os.Stderr, "%s: %d invalid lines:\n", path, len(initialsErrors))
-
-			// エラーログの出力
-			for _, error := range initialsErrors {
-				fmt.Fprintf(os.Stderr, "  %v\n", error)
-			}
-
-			return nil
+			return checkInitials(r, allowInitial), nil
 		})
 
-		if walkError != nil {
-			return walkError
+		if walkErr != nil {
+			return walkErr
+		}
+
+		for _, res := range results {
+			if res.CriticalError != nil && len(res.Errors) == 0 {
+				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", res.Path, res.CriticalError)
+				flagError = true
+				continue
+			}
+
+			if len(res.Errors) == 0 {
+				continue
+			}
+
+			flagError = true
+			fmt.Fprintf(os.Stderr, "%s: %d invalid lines:\n", res.Path, len(res.Errors))
+			for _, err := range res.Errors {
+				fmt.Fprintf(os.Stderr, "  %v\n", err)
+			}
 		}
 
 		if flagError {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,60 +23,30 @@ var formatCheckCmd = &cobra.Command{
 		filePath := args[0]
 		flagError := false
 
-		// 入力されたパスに応じて再帰処理
-		walkError := filepath.WalkDir(filePath, func(path string, meta os.DirEntry, err error) error {
-			// WalkDir からのエラーはそのまま返す
-			if err != nil {
-				return err
-			}
-
-			// ディレクトリはスキップ
-			if meta.IsDir() {
-				return nil
-			}
-
-			// 拡張子jsonl以外はスキップ
-			if !strings.HasSuffix(meta.Name(), "jsonl") {
-				return nil
-			}
-
-			// ファイルオープン
-			file, fileError := os.Open(path)
-
-			// ファイルオープン失敗はログ出力してスキップ
-			if fileError != nil {
-				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", path, fileError)
-				flagError = true
-				return nil
-			}
-
-			// 関数終了時にファイルクローズ
-			defer file.Close()
-
-			// フォーマットチェック実行
-			validateErrors := validateJSONL(file)
-
-			// エラーがなければスキップ
-			if len(validateErrors) == 0 {
-				return nil
-			}
-
-			// フラグ建て
-			flagError = true
-
-			// エラーファイル名、エラー数の出力
-			fmt.Fprintf(os.Stderr, "%s: %d invalid lines:\n", path, len(validateErrors))
-
-			// エラーログの出力
-			for _, error := range validateErrors {
-				fmt.Fprintf(os.Stderr, "  %v\n", error)
-			}
-
-			return nil
+		results, walkError := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
+			return validateJSONL(r), nil
 		})
 
 		if walkError != nil {
 			return walkError
+		}
+
+		for _, res := range results {
+			if res.CriticalError != nil && len(res.Errors) == 0 {
+				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", res.Path, res.CriticalError)
+				flagError = true
+				continue
+			}
+
+			if len(res.Errors) == 0 {
+				continue
+			}
+
+			flagError = true
+			fmt.Fprintf(os.Stderr, "%s: %d invalid lines:\n", res.Path, len(res.Errors))
+			for _, err := range res.Errors {
+				fmt.Fprintf(os.Stderr, "  %v\n", err)
+			}
 		}
 
 		if flagError {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -31,57 +30,23 @@ var sortCmd = &cobra.Command{
 		filePath := args[0]
 		flagError := false
 
-		walkError := filepath.WalkDir(filePath, func(path string, d fs.DirEntry, err error) error {
-			// WalkDir からのエラーはそのまま返す
-			if err != nil {
-				return err
-			}
-
-			// ディレクトリはリセット
-			if d.IsDir() {
-				return nil
-			}
-
-			// 拡張子jsonl以外はスキップ
-			if !strings.HasSuffix(d.Name(), "jsonl") {
-				return nil
-			}
-
-			// ファイルオープン
-			file, fileError := os.Open(path)
-
-			// ファイルオープン失敗はログ出力してスキップ
-			if fileError != nil {
-				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", path, fileError)
-				flagError = true
-				return nil
-			}
-
-			// 関数終了時にファイルクローズ
-			defer file.Close()
-
+		results, walkError := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
 			if fixFlag {
-				sorted, err := sortData(file, orderMap)
-
+				sorted, err := sortData(r, orderMap)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to fix %s: %v\n", path, err)
-					flagError = true
-					return nil
+					return nil, err
+				}
+				if sorted == nil {
+					return nil, nil
 				}
 
 				fmt.Fprintf(os.Stdout, "sorted %v\n", sorted)
 
 				tmpDir := filepath.Dir(path)
-
 				tmp, err := os.CreateTemp(tmpDir, ".tmp-*")
-
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to create tmp %s: %v\n", path, err)
-					flagError = true
-					return nil
+					return nil, err
 				}
-
-				// 関数終了時に一時ファイルを破棄
 				defer os.Remove(tmp.Name())
 
 				for _, e := range sorted {
@@ -92,36 +57,39 @@ var sortCmd = &cobra.Command{
 					fmt.Fprintln(tmp, okLine)
 				}
 
-				// 一時ファイルの出力
 				tmp.Sync()
 				tmp.Close()
 
-				return os.Rename(tmp.Name(), path)
+				if err := os.Rename(tmp.Name(), path); err != nil {
+					return nil, err
+				}
+
+				return nil, nil
 			}
 
-			validateErrors := validateSortedJSONL(file)
-
-			// エラーがなければスキップ
-			if len(validateErrors) == 0 {
-				return nil
-			}
-
-			// フラグ建て
-			flagError = true
-
-			// エラーファイル名、エラー数の出力
-			fmt.Fprintf(os.Stderr, "%s: %d ordering errors:\n", path, len(validateErrors))
-
-			// エラーログの出力
-			for _, e := range validateErrors {
-				fmt.Fprintf(os.Stderr, "  %v\n", e)
-			}
-
-			return nil
+			return validateSortedJSONL(r), nil
 		})
 
 		if walkError != nil {
 			return walkError
+		}
+
+		for _, res := range results {
+			if res.CriticalError != nil && len(res.Errors) == 0 {
+				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", res.Path, res.CriticalError)
+				flagError = true
+				continue
+			}
+
+			if len(res.Errors) == 0 {
+				continue
+			}
+
+			flagError = true
+			fmt.Fprintf(os.Stderr, "%s: %d ordering errors:\n", res.Path, len(res.Errors))
+			for _, e := range res.Errors {
+				fmt.Fprintf(os.Stderr, "  %v\n", e)
+			}
 		}
 
 		if flagError {
