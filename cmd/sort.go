@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,10 @@ import (
 )
 
 // sortCmd represents the sort command
+var fixFlag bool
+
+var orderMap = buildOrderMap()
+
 var sortCmd = &cobra.Command{
 	Use:          "sort",
 	Short:        "Check that JSONL 'key's are sorted",
@@ -54,6 +59,45 @@ var sortCmd = &cobra.Command{
 
 			// 関数終了時にファイルクローズ
 			defer file.Close()
+
+			if fixFlag {
+				sorted, err := sortData(file, orderMap)
+
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "failed to fix %s: %v\n", path, err)
+					flagError = true
+					return nil
+				}
+
+				fmt.Fprintf(os.Stdout, "sorted %v\n", sorted)
+
+				tmpDir := filepath.Dir(path)
+
+				tmp, err := os.CreateTemp(tmpDir, ".tmp-*")
+
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "failed to create tmp %s: %v\n", path, err)
+					flagError = true
+					return nil
+				}
+
+				// 関数終了時に一時ファイルを破棄
+				defer os.Remove(tmp.Name())
+
+				for _, e := range sorted {
+					b, _ := json.Marshal(e)
+					tmpLine := strings.ReplaceAll(string(b), ":\"", ": \"")
+					tmpLine2 := strings.ReplaceAll(tmpLine, ":[", ": [")
+					okLine := strings.ReplaceAll(tmpLine2, ",\"", ", \"")
+					fmt.Fprintln(tmp, okLine)
+				}
+
+				// 一時ファイルの出力
+				tmp.Sync()
+				tmp.Close()
+
+				return os.Rename(tmp.Name(), path)
+			}
 
 			validateErrors := validateSortedJSONL(file)
 
@@ -104,6 +148,7 @@ var sortOrder = []string{
 }
 
 func init() {
+	sortCmd.Flags().BoolVar(&fixFlag, "fix", false, "Fix files by sorting keys in place")
 	rootCmd.AddCommand(sortCmd)
 }
 
@@ -114,8 +159,6 @@ func validateSortedJSONL(reader io.Reader) []error {
 
 	var errors []error
 	var prevKey string
-
-	orderMap := buildOrderMap()
 
 	// 1行づつ繰り返し処理
 	for scanner.Scan() {
@@ -193,4 +236,33 @@ func compareKeys(prevKey string, currentKey string, orderMap map[rune]int) int {
 	}
 
 	return 1
+}
+
+// sortData ソート済みデータ作成関数
+func sortData(reader io.Reader, orderMap map[rune]int) ([]entry.Entry, error) {
+	scanner := json.NewDecoder(reader)
+
+	var records []entry.Entry
+
+	// ファイルパース
+	for scanner.More() {
+		var record entry.Entry
+
+		if err := scanner.Decode(&record); err != nil {
+			return nil, fmt.Errorf("parse error")
+		}
+
+		records = append(records, record)
+	}
+
+	// 1行だけなら修正不要のため、離脱
+	if len(records) <= 1 {
+		return nil, nil
+	}
+
+	sort.SliceStable(records, func(i, j int) bool {
+		return compareKeys(records[i].Key, records[j].Key, orderMap) < 0
+	})
+
+	return records, nil
 }
