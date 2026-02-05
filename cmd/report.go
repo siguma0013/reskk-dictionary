@@ -12,18 +12,18 @@ func printResults(results []fileResult, errOut io.Writer, listLabel string) bool
 
 	for _, res := range results {
 		if res.CriticalError != nil && len(res.Errors) == 0 {
-			fmt.Fprintf(errOut, "failed to open %s: %v\n", res.Path, res.CriticalError)
+			fmt.Fprintf(errOut, "[NG] %s: %v\n", res.Path, res.CriticalError)
 			flagError = true
 			continue
 		}
 
 		if len(res.Errors) == 0 {
-			fmt.Fprintf(errOut, "%s: OK\n", res.Path)
+			fmt.Fprintf(errOut, "[OK] %s\n", res.Path)
 			continue
 		}
 
 		flagError = true
-		fmt.Fprintf(errOut, "%s: %d %s:\n", res.Path, len(res.Errors), listLabel)
+		fmt.Fprintf(errOut, "[NG] %s: %d %s:\n", res.Path, len(res.Errors), listLabel)
 		for _, e := range res.Errors {
 			fmt.Fprintf(errOut, "  %v\n", e)
 		}
