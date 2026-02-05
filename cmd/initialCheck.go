@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"siguma0013/reskk-dictionary/internal/entry"
+	"siguma0013/reskk-dictionary/internal/dictionary"
 	"slices"
 	"strings"
 
@@ -42,7 +42,7 @@ to quickly create a Cobra application.`,
 				return nil, nil // 対象外
 			}
 
-			allowInitial, ok := allowInitials[filepath.Base(path)]
+			allowInitial, ok := dictionary.AllowInitials[filepath.Base(path)]
 			if !ok {
 				return []error{fmt.Errorf("contains disallow filename: %v", path)}, nil
 			}
@@ -68,19 +68,6 @@ func init() {
 	rootCmd.AddCommand(initialCheckCmd)
 }
 
-var allowInitials = map[string][]string{
-	"01-a.jsonl":  {"あ", "い", "う", "え", "お"},
-	"02-ka.jsonl": {"か", "が", "き", "ぎ", "く", "ぐ", "け", "げ", "こ", "ご"},
-	"03-sa.jsonl": {"さ", "ざ", "し", "じ", "す", "ず", "せ", "ぜ", "そ", "ぞ"},
-	"04-ta.jsonl": {"た", "だ", "ち", "ぢ", "つ", "づ", "て", "で", "と", "ど"},
-	"05-na.jsonl": {"な", "に", "ぬ", "ね", "の"},
-	"06-ha.jsonl": {"は", "ば", "ぱ", "ひ", "び", "ぴ", "ふ", "ぶ", "ぷ", "へ", "べ", "ぺ", "ほ", "ぼ", "ぽ"},
-	"07-ma.jsonl": {"ま", "み", "む", "め", "も"},
-	"08-ya.jsonl": {"や", "ゆ", "よ"},
-	"09-ra.jsonl": {"ら", "り", "る", "れ", "ろ"},
-	"10-wa.jsonl": {"わ", "を", "ん"},
-}
-
 // checkInitials 辞書ファイルの頭文字チェック関数
 func checkInitials(reader io.Reader, allowInitial []string) []error {
 	scanner := bufio.NewScanner(reader)
@@ -92,7 +79,7 @@ func checkInitials(reader io.Reader, allowInitial []string) []error {
 	for scanner.Scan() {
 		lineCount++
 
-		var record entry.Entry
+		var record dictionary.Entry
 
 		// パース
 		if err := json.Unmarshal(scanner.Bytes(), &record); err != nil {

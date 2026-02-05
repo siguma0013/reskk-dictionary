@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"siguma0013/reskk-dictionary/internal/dictionary"
 	"strings"
 	"testing"
 )
@@ -33,7 +34,7 @@ func TestValidateSortedJSONL_Invalid(t *testing.T) {
 }
 
 func TestCompareKeys(t *testing.T) {
-	order := buildOrderMap()
+	order := dictionary.SortOrder()
 
 	if compareKeys("か", "が", order) < 0 {
 		// "か" should come before "が"
@@ -49,7 +50,7 @@ func TestCompareKeys(t *testing.T) {
 }
 
 func TestSortData(t *testing.T) {
-	order := buildOrderMap()
+	order := dictionary.SortOrder()
 
 	reader := strings.NewReader(strings.Join([]string{
 		`{"key":"きのう","value":["機能"]}`,

@@ -7,18 +7,17 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"siguma0013/reskk-dictionary/internal/dictionary"
 	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"siguma0013/reskk-dictionary/internal/entry"
 )
 
 // sortCmd represents the sort command
 var fixFlag bool
 
-var orderMap = buildOrderMap()
+var orderMap = dictionary.SortOrder()
 
 var sortCmd = &cobra.Command{
 	Use:          "sort",
@@ -83,19 +82,6 @@ var sortCmd = &cobra.Command{
 	},
 }
 
-var sortOrder = []string{
-	"あ", "ぁ", "い", "ぃ", "う", "ぅ", "え", "ぇ", "お", "ぉ",
-	"か", "が", "き", "ぎ", "く", "ぐ", "け", "げ", "こ", "ご",
-	"さ", "ざ", "し", "じ", "す", "ず", "せ", "ぜ", "そ", "ぞ",
-	"た", "だ", "ち", "ぢ", "つ", "っ", "づ", "て", "で", "と", "ど",
-	"な", "に", "ぬ", "ね", "の",
-	"は", "ば", "ぱ", "ひ", "び", "ぴ", "ふ", "ぶ", "ぷ", "へ", "べ", "ぺ", "ほ", "ぼ", "ぽ",
-	"ま", "み", "む", "め", "も",
-	"や", "ゃ", "ゆ", "ゅ", "よ", "ょ",
-	"ら", "り", "る", "れ", "ろ",
-	"わ", "を", "ん",
-}
-
 func init() {
 	sortCmd.Flags().BoolVar(&fixFlag, "fix", false, "Fix files by sorting keys in place")
 	rootCmd.AddCommand(sortCmd)
@@ -113,7 +99,7 @@ func validateSortedJSONL(reader io.Reader) []error {
 	for scanner.Scan() {
 		lineCount++
 
-		var record entry.Entry
+		var record dictionary.Entry
 
 		// パース
 		if err := json.Unmarshal(scanner.Bytes(), &record); err != nil {
@@ -133,19 +119,6 @@ func validateSortedJSONL(reader io.Reader) []error {
 	}
 
 	return errors
-}
-
-func buildOrderMap() map[rune]int {
-	orderMap := make(map[rune]int)
-
-	for index, s := range sortOrder {
-		r := []rune(s)
-		if len(r) > 0 {
-			orderMap[r[0]] = index
-		}
-	}
-
-	return orderMap
 }
 
 // compareKeys returns -1 if prevKey < currentKey, 0 if equal, 1 if prevKey > currentKey according to kana order map
@@ -188,14 +161,14 @@ func compareKeys(prevKey string, currentKey string, orderMap map[rune]int) int {
 }
 
 // sortData ソート済みデータ作成関数
-func sortData(reader io.Reader, orderMap map[rune]int) ([]entry.Entry, error) {
+func sortData(reader io.Reader, orderMap map[rune]int) ([]dictionary.Entry, error) {
 	scanner := json.NewDecoder(reader)
 
-	var records []entry.Entry
+	var records []dictionary.Entry
 
 	// ファイルパース
 	for scanner.More() {
-		var record entry.Entry
+		var record dictionary.Entry
 
 		if err := scanner.Decode(&record); err != nil {
 			return nil, fmt.Errorf("parse error")

@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"siguma0013/reskk-dictionary/internal/dictionary"
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"siguma0013/reskk-dictionary/internal/entry"
 )
 
 var formatCheckCmd = &cobra.Command{
@@ -72,7 +71,7 @@ func validateJSONL(reader io.Reader) []error {
 		decoder := json.NewDecoder(strings.NewReader(line))
 		decoder.DisallowUnknownFields()
 
-		var record entry.Entry
+		var record dictionary.Entry
 
 		if decodeError := decoder.Decode(&record); decodeError != nil {
 			errors = append(errors, fmt.Errorf("line %d: schema error", lineCount))
@@ -91,7 +90,7 @@ func validateJSONL(reader io.Reader) []error {
 			continue
 		}
 
-		for _, rule := range entry.FormatRules {
+		for _, rule := range dictionary.FormatRules {
 			if rule.Regexp.MatchString(line) {
 				errors = append(errors, fmt.Errorf("line %d: %v", lineCount, rule.Message))
 			}
