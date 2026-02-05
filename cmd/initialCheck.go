@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"siguma0013/reskk-dictionary/internal/dictionary"
 	"slices"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -30,21 +29,10 @@ to quickly create a Cobra application.`,
 		filePath := args[0]
 
 		results, walkErr := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
-			// 相対パスの取得
-			rel, err := filepath.Rel(filePath, path)
-			if err != nil {
-				return nil, err
-			}
-
-			// 階層が1つ下のものだけ対象
-			parts := strings.Split(rel, string(os.PathSeparator))
-			if len(parts) != 2 {
-				return nil, nil // 対象外
-			}
-
 			allowInitial, ok := dictionary.AllowInitials[filepath.Base(path)]
+
 			if !ok {
-				return []error{fmt.Errorf("contains disallow filename: %v", path)}, nil
+				return nil, fmt.Errorf("辞書の10行分割で許可されていないファイル名です")
 			}
 
 			return checkInitials(r, allowInitial), nil
