@@ -18,6 +18,7 @@ func printResults(results []fileResult, errOut io.Writer, listLabel string) bool
 		}
 
 		if len(res.Errors) == 0 {
+			fmt.Fprintf(errOut, "%s: OK\n", res.Path)
 			continue
 		}
 
