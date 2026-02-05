@@ -15,7 +15,7 @@ import (
 )
 
 var formatCheckCmd = &cobra.Command{
-	Use:          "formatCheck",
+	Use:          "format",
 	Short:        "Check JSONL format correctness under a directory",
 	Long:         `Check JSONL files recursively and report invalid JSON lines with file and line numbers.`,
 	Args:         cobra.MaximumNArgs(1),
