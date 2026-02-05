@@ -28,7 +28,6 @@ to quickly create a Cobra application.`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
-		flagError := false
 
 		results, walkErr := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
 			// 相対パスの取得
@@ -55,25 +54,7 @@ to quickly create a Cobra application.`,
 			return walkErr
 		}
 
-		for _, res := range results {
-			if res.CriticalError != nil && len(res.Errors) == 0 {
-				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", res.Path, res.CriticalError)
-				flagError = true
-				continue
-			}
-
-			if len(res.Errors) == 0 {
-				continue
-			}
-
-			flagError = true
-			fmt.Fprintf(os.Stderr, "%s: %d invalid lines:\n", res.Path, len(res.Errors))
-			for _, err := range res.Errors {
-				fmt.Fprintf(os.Stderr, "  %v\n", err)
-			}
-		}
-
-		if flagError {
+		if printResults(results, os.Stderr, "invalid lines") {
 			return fmt.Errorf("invalid initial found")
 		}
 

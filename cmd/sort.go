@@ -28,7 +28,6 @@ var sortCmd = &cobra.Command{
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
-		flagError := false
 
 		results, walkError := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
 			if fixFlag {
@@ -74,25 +73,7 @@ var sortCmd = &cobra.Command{
 			return walkError
 		}
 
-		for _, res := range results {
-			if res.CriticalError != nil && len(res.Errors) == 0 {
-				fmt.Fprintf(os.Stderr, "failed to open %s: %v\n", res.Path, res.CriticalError)
-				flagError = true
-				continue
-			}
-
-			if len(res.Errors) == 0 {
-				continue
-			}
-
-			flagError = true
-			fmt.Fprintf(os.Stderr, "%s: %d ordering errors:\n", res.Path, len(res.Errors))
-			for _, e := range res.Errors {
-				fmt.Fprintf(os.Stderr, "  %v\n", e)
-			}
-		}
-
-		if flagError {
+		if printResults(results, os.Stderr, "ordering errors") {
 			return fmt.Errorf("out-of-order keys found")
 		}
 
