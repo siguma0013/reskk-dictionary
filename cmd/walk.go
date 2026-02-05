@@ -14,8 +14,8 @@ import (
 // Errors: ファイルの検査が返した行単位などのエラー一覧
 // OpenErr: ファイルオープンや処理中に発生した致命的なエラー
 type fileResult struct {
-	Path    string
-	Errors  []error
+	Path          string
+	Errors        []error
 	CriticalError error
 }
 
@@ -52,11 +52,15 @@ func WalkJSONL(
 			return nil
 		}
 
-		errs, processError := process(path, file)
-		// 開いたファイルはここで閉じる
-		file.Close()
+		// 関数終了時にファイルクローズ呼出を強制
+		defer file.Close()
 
-		results = append(results, fileResult{Path: path, Errors: errs, CriticalError: processError})
+		// 各コマンドの処理を実行
+		validationErrors, processError := process(path, file)
+
+		// 処理結果を作成、エラーの有無に関わらず作成
+		results = append(results, fileResult{Path: path, Errors: validationErrors, CriticalError: processError})
+
 		return nil
 	})
 
