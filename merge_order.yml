@@ -1,0 +1,4 @@
+files:
+  - "jsonl/number.jsonl"
+  - "jsonl/number_word.jsonl"
+  - "jsonl/2_char_jukugo/*"
