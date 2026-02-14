@@ -14,32 +14,26 @@ import (
 )
 
 var (
-	ciFlag bool
+	isInitialCi bool
 )
 
 // initialCheckCmd represents the initialCheck command
 var initialCheckCmd = &cobra.Command{
-	Use:   "initial",
-	Short: "",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:          "initial",
+	Short:        "10行分割辞書ファイルが適切に分割されているかチェックするコマンド",
 	Args:         cobra.MaximumNArgs(1),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
 
-		results := utility.WalkJsonl(filePath, filter, func(path string, file io.Reader) []error {
+		results := utility.WalkJsonl(filePath, filterInitial, func(path string, file io.Reader) []error {
 			allowInitial, ok := dictionary.AllowInitials[filepath.Base(path)]
 
 			if !ok {
 				return []error{fmt.Errorf("辞書の10行分割で許可されていないファイル名です")}
 			}
 
-			return checkInitials(file, allowInitial)
+			return checkInitial(file, allowInitial)
 		})
 
 		if utility.PrintResults(results) {
@@ -53,24 +47,24 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	initialCheckCmd.Flags().BoolVar(&ciFlag, "ci", false, "use ci")
+	initialCheckCmd.Flags().BoolVar(&isInitialCi, "ci", false, "use ci")
 
 	rootCmd.AddCommand(initialCheckCmd)
 }
 
-func filter(path string, root string) bool {
+func filterInitial(path string, root string) bool {
 	pathDepth := utility.FileDepth(path)
 	rootDepth := utility.FileDepth(root)
 
-	if ciFlag {
+	if isInitialCi {
 		return (pathDepth - rootDepth) == 2
 	} else {
 		return true
 	}
 }
 
-// checkInitials 辞書ファイルの頭文字チェック関数
-func checkInitials(reader io.Reader, allowInitial []string) []error {
+// checkInitial 辞書ファイルの頭文字チェック関数
+func checkInitial(reader io.Reader, allowInitial []string) []error {
 	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 
