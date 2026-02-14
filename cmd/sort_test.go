@@ -13,7 +13,7 @@ func TestValidateSortedJSONL_Valid(t *testing.T) {
 		`{"key":"う","value":["u"]}`,
 	}, "\n"))
 
-	errs := validateSortedJSONL(reader)
+	errs := validateSortedJSONL("", reader)
 
 	if len(errs) != 0 {
 		t.Fatalf("expected no errors, got %v", errs)
@@ -26,7 +26,7 @@ func TestValidateSortedJSONL_Invalid(t *testing.T) {
 		`{"key":"あ","value":["a"]}`,
 	}, "\n"))
 
-	errs := validateSortedJSONL(reader)
+	errs := validateSortedJSONL("", reader)
 
 	if len(errs) != 1 {
 		t.Fatalf("expected 1 error, got %d: %v", len(errs), errs)

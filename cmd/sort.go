@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"siguma0013/reskk-dictionary/internal/dictionary"
+	"siguma0013/reskk-dictionary/internal/utility"
 	"sort"
 	"strings"
 
@@ -16,8 +17,6 @@ import (
 
 // sortCmd represents the sort command
 var fixFlag bool
-
-var orderMap = dictionary.SortOrder()
 
 var sortCmd = &cobra.Command{
 	Use:          "sort",
@@ -28,51 +27,15 @@ var sortCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
 
-		results, walkError := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
-			if fixFlag {
-				sorted, err := sortData(r, orderMap)
-				if err != nil {
-					return nil, err
-				}
-				if sorted == nil {
-					return nil, nil
-				}
+		var results []utility.FileResult
 
-				fmt.Fprintf(os.Stdout, "sorted %v\n", sorted)
-
-				tmpDir := filepath.Dir(path)
-				tmp, err := os.CreateTemp(tmpDir, ".tmp-*")
-				if err != nil {
-					return nil, err
-				}
-				defer os.Remove(tmp.Name())
-
-				for _, e := range sorted {
-					b, _ := json.Marshal(e)
-					tmpLine := strings.ReplaceAll(string(b), ":\"", ": \"")
-					tmpLine2 := strings.ReplaceAll(tmpLine, ":[", ": [")
-					okLine := strings.ReplaceAll(tmpLine2, ",\"", ", \"")
-					fmt.Fprintln(tmp, okLine)
-				}
-
-				tmp.Sync()
-				tmp.Close()
-
-				if err := os.Rename(tmp.Name(), path); err != nil {
-					return nil, err
-				}
-
-				return nil, nil
-			}
-
-			return validateSortedJSONL(r), nil
-		})
-
-		if walkError != nil {
-			return walkError
+		if fixFlag {
+			results = utility.WalkJsonl(filePath, nil, fixProcess)
+		} else {
+			results = utility.WalkJsonl(filePath, nil, validateSortedJSONL)
 		}
 
-		if printResults(results, os.Stderr, "ordering errors") {
+		if utility.PrintResults(results) {
 			return fmt.Errorf("out-of-order keys found")
 		}
 
@@ -87,13 +50,54 @@ func init() {
 	rootCmd.AddCommand(sortCmd)
 }
 
+func fixProcess(path string, reader io.Reader) []error {
+	// ソート済みデータの作成
+	sorted, err := sortData(reader, dictionary.SortOrder())
+
+	if err != nil {
+		return []error{err}
+	}
+
+	// 出力ディレクトリの特定
+	outputDir := filepath.Dir(path)
+
+	// 一時ファイル作成
+	tmp, err := os.CreateTemp(outputDir, ".tmp-*")
+	if err != nil {
+		return []error{err}
+	}
+
+	// 関数終了時に一時ファイルを削除
+	defer os.Remove(tmp.Name())
+
+	for _, e := range sorted {
+		b, _ := json.Marshal(e)
+		tmpLine := strings.ReplaceAll(string(b), ":\"", ": \"")
+		tmpLine2 := strings.ReplaceAll(tmpLine, ":[", ": [")
+		okLine := strings.ReplaceAll(tmpLine2, ",\"", ", \"")
+		fmt.Fprintln(tmp, okLine)
+	}
+
+	// ファイル置換のために書き込みが完全終了してから処理移行
+	tmp.Sync()
+	tmp.Close()
+
+	if err := os.Rename(tmp.Name(), path); err != nil {
+		return []error{err}
+	}
+
+	return nil
+}
+
 // validateSortedJSONL checks that each successive 'key' is in non-decreasing order
-func validateSortedJSONL(reader io.Reader) []error {
+func validateSortedJSONL(path string, reader io.Reader) []error {
 	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 
 	var errors []error
 	var prevKey string
+
+	var orderMap = dictionary.SortOrder()
 
 	// 1行づつ繰り返し処理
 	for scanner.Scan() {

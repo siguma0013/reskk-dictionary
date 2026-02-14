@@ -7,7 +7,7 @@ import (
 
 func TestValidateJSONL_Valid(t *testing.T) {
 	reader := strings.NewReader(`{"key": "きのう", "value": ["機能", "昨日"]}`)
-	validateError := validateJSONL(reader)
+	validateError := validateJSONL("", reader)
 	if len(validateError) != 0 {
 		t.Fatalf("expected no errors, got %v", validateError)
 	}
@@ -38,7 +38,7 @@ func TestValidateJSONL_Invalid(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			reader := strings.NewReader(test.jsonl)
-			validateError := validateJSONL(reader)
+			validateError := validateJSONL("", reader)
 			if len(validateError) != 1 {
 				t.Fatalf("expected 1 error, got %d: %v", len(validateError), validateError)
 			}
