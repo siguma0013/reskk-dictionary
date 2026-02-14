@@ -19,7 +19,7 @@ var (
 
 // initialCheckCmd represents the initialCheck command
 var initialCheckCmd = &cobra.Command{
-	Use:   "initialCheck",
+	Use:   "initial",
 	Short: "",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
