@@ -1,0 +1,32 @@
+name: LINT
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  jsonl-format-check:
+    name: JSONL format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25.6
+
+      - name: Build binary
+        run: go build
+
+      - name: Run JSONL format check
+        run: ./reskk-dictionary format jsonl
+
+      - name: Run JSONL initial check
+        run: ./reskk-dictionary initial jsonl --ci
+
+      - name: Run JSONL sort check
+        run: ../reskk-dictionary sort jsonl
