@@ -16,12 +16,11 @@ import (
 )
 
 // sortCmd represents the sort command
-var fixFlag bool
+var isSortFix bool
 
 var sortCmd = &cobra.Command{
 	Use:          "sort",
-	Short:        "Check that JSONL 'key's are sorted",
-	Long:         "Check JSONL files recursively and report out-of-order keys.",
+	Short:        "辞書ファイルのソート確認&修正をするコマンド",
 	Args:         cobra.MaximumNArgs(1),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -29,10 +28,12 @@ var sortCmd = &cobra.Command{
 
 		var results []utility.FileResult
 
-		if fixFlag {
-			results = utility.WalkJsonl(filePath, nil, fixProcess)
+		if isSortFix {
+			results = utility.WalkJsonl(filePath, nil, sortJsonl)
 		} else {
-			results = utility.WalkJsonl(filePath, nil, validateSortedJSONL)
+			results = utility.WalkJsonl(filePath, nil, func(path string, file io.Reader) []error {
+				return checkSorted(file)
+			})
 		}
 
 		if utility.PrintResults(results) {
@@ -46,11 +47,11 @@ var sortCmd = &cobra.Command{
 }
 
 func init() {
-	sortCmd.Flags().BoolVar(&fixFlag, "fix", false, "Fix files by sorting keys in place")
+	sortCmd.Flags().BoolVar(&isSortFix, "fix", false, "Fix files by sorting keys in place")
 	rootCmd.AddCommand(sortCmd)
 }
 
-func fixProcess(path string, reader io.Reader) []error {
+func sortJsonl(path string, reader io.Reader) []error {
 	// ソート済みデータの作成
 	sorted, err := sortData(reader, dictionary.SortOrder())
 
@@ -89,8 +90,8 @@ func fixProcess(path string, reader io.Reader) []error {
 	return nil
 }
 
-// validateSortedJSONL checks that each successive 'key' is in non-decreasing order
-func validateSortedJSONL(path string, reader io.Reader) []error {
+// checkSorted checks that each successive 'key' is in non-decreasing order
+func checkSorted(reader io.Reader) []error {
 	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 

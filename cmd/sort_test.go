@@ -6,27 +6,27 @@ import (
 	"testing"
 )
 
-func TestValidateSortedJSONL_Valid(t *testing.T) {
+func TestCheckSorted_Valid(t *testing.T) {
 	reader := strings.NewReader(strings.Join([]string{
 		`{"key":"あ","value":["a"]}`,
 		`{"key":"い","value":["i"]}`,
 		`{"key":"う","value":["u"]}`,
 	}, "\n"))
 
-	errs := validateSortedJSONL("", reader)
+	errs := checkSorted(reader)
 
 	if len(errs) != 0 {
 		t.Fatalf("expected no errors, got %v", errs)
 	}
 }
 
-func TestValidateSortedJSONL_Invalid(t *testing.T) {
+func TestCheckSorted_Invalid(t *testing.T) {
 	reader := strings.NewReader(strings.Join([]string{
 		`{"key":"い","value":["i"]}`,
 		`{"key":"あ","value":["a"]}`,
 	}, "\n"))
 
-	errs := validateSortedJSONL("", reader)
+	errs := checkSorted(reader)
 
 	if len(errs) != 1 {
 		t.Fatalf("expected 1 error, got %d: %v", len(errs), errs)
