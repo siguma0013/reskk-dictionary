@@ -15,7 +15,7 @@ type FileResult struct {
 }
 
 // WalkJsonl はWalkDirのラッパー
-//  - filter が true を返すファイルはスキップされる
+//  - filter が false を返すファイルはスキップされる
 //  - process にエラーチェックロジックを実装する
 func WalkJsonl(
 	root string,

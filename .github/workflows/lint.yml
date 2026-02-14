@@ -29,4 +29,4 @@ jobs:
         run: ./reskk-dictionary initial jsonl --ci
 
       - name: Run JSONL sort check
-        run: ../reskk-dictionary sort jsonl
+        run: ./reskk-dictionary sort jsonl --ci

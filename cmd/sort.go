@@ -16,7 +16,10 @@ import (
 )
 
 // sortCmd represents the sort command
-var isSortFix bool
+var (
+	isSortCi bool
+	isSortFix bool
+)
 
 var sortCmd = &cobra.Command{
 	Use:          "sort",
@@ -31,7 +34,7 @@ var sortCmd = &cobra.Command{
 		if isSortFix {
 			results = utility.WalkJsonl(filePath, nil, sortJsonl)
 		} else {
-			results = utility.WalkJsonl(filePath, nil, func(path string, file io.Reader) []error {
+			results = utility.WalkJsonl(filePath, sortFilter, func(path string, file io.Reader) []error {
 				return checkSorted(file)
 			})
 		}
@@ -47,8 +50,19 @@ var sortCmd = &cobra.Command{
 }
 
 func init() {
+	sortCmd.Flags().BoolVar(&isSortCi, "ci", false, "use ci")
 	sortCmd.Flags().BoolVar(&isSortFix, "fix", false, "Fix files by sorting keys in place")
 	rootCmd.AddCommand(sortCmd)
+}
+
+func sortFilter(path string, _ string) bool {
+	if !isSortCi {
+		return true
+	}
+
+	fmt.Printf("is number.jsonl: %s\n", filepath.Base(path))
+
+	return filepath.Base(path) != "number.jsonl"
 }
 
 func sortJsonl(path string, reader io.Reader) []error {
