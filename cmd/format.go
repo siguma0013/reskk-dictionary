@@ -14,14 +14,15 @@ import (
 
 var formatCheckCmd = &cobra.Command{
 	Use:          "format",
-	Short:        "Check JSONL format correctness under a directory",
-	Long:         `Check JSONL files recursively and report invalid JSON lines with file and line numbers.`,
+	Short:        "辞書ファイルのフォーマットをチェックするコマンド",
 	Args:         cobra.MaximumNArgs(1),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error { // 実行時に呼ばれる関数（エラーを返せる）
 		filePath := args[0]
 
-		results := utility.WalkJsonl(filePath, nil, validateJSONL)
+		results := utility.WalkJsonl(filePath, nil, func(path string, file io.Reader) []error {
+			return checkFormat(file)
+		})
 
 		if utility.PrintResults(results) {
 			return fmt.Errorf("invalid JSONL format found")
@@ -37,8 +38,8 @@ func init() {
 	rootCmd.AddCommand(formatCheckCmd)
 }
 
-// validateJSONL 辞書ファイルのフォーマットチェック本体
-func validateJSONL(_ string, reader io.Reader) []error {
+// checkFormat は辞書ファイルのフォーマットチェック本体
+func checkFormat(reader io.Reader) []error {
 	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 
