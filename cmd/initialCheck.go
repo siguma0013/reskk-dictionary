@@ -5,12 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"siguma0013/reskk-dictionary/internal/dictionary"
+	"siguma0013/reskk-dictionary/internal/utility"
 	"slices"
 
 	"github.com/spf13/cobra"
+)
+
+var (
+	ciFlag bool
 )
 
 // initialCheckCmd represents the initialCheck command
@@ -28,21 +32,17 @@ to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filePath := args[0]
 
-		results, walkErr := WalkJSONL(filePath, func(path string, r io.Reader) ([]error, error) {
+		results := utility.WalkJsonl(filePath, filter, func(path string, file io.Reader) []error {
 			allowInitial, ok := dictionary.AllowInitials[filepath.Base(path)]
 
 			if !ok {
-				return nil, fmt.Errorf("辞書の10行分割で許可されていないファイル名です")
+				return []error{fmt.Errorf("辞書の10行分割で許可されていないファイル名です")}
 			}
 
-			return checkInitials(r, allowInitial), nil
+			return checkInitials(file, allowInitial)
 		})
 
-		if walkErr != nil {
-			return walkErr
-		}
-
-		if printResults(results, os.Stderr, "invalid lines") {
+		if utility.PrintResults(results) {
 			return fmt.Errorf("invalid initial found")
 		}
 
@@ -53,7 +53,20 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
+	initialCheckCmd.Flags().BoolVar(&ciFlag, "ci", false, "use ci")
+
 	rootCmd.AddCommand(initialCheckCmd)
+}
+
+func filter(path string, root string) bool {
+	pathDepth := utility.FileDepth(path)
+	rootDepth := utility.FileDepth(root)
+
+	if ciFlag {
+		return (pathDepth - rootDepth) == 2
+	} else {
+		return true
+	}
 }
 
 // checkInitials 辞書ファイルの頭文字チェック関数
@@ -61,7 +74,7 @@ func checkInitials(reader io.Reader, allowInitial []string) []error {
 	scanner := bufio.NewScanner(reader)
 	lineCount := 0
 
-	var errors []error
+	var results []error
 
 	// 1行づつ繰り返し処理
 	for scanner.Scan() {
@@ -71,7 +84,7 @@ func checkInitials(reader io.Reader, allowInitial []string) []error {
 
 		// パース
 		if err := json.Unmarshal(scanner.Bytes(), &record); err != nil {
-			errors = append(errors, fmt.Errorf("parse error: %d", lineCount))
+			results = append(results, fmt.Errorf("parse error: %d", lineCount))
 			continue
 		}
 
@@ -80,10 +93,10 @@ func checkInitials(reader io.Reader, allowInitial []string) []error {
 		initial := string([]rune(key)[0])
 
 		if !slices.Contains(allowInitial, initial) {
-			errors = append(errors, fmt.Errorf("initial error: %d", lineCount))
+			results = append(results, fmt.Errorf("initial error: %d", lineCount))
 			continue
 		}
 	}
 
-	return errors
+	return results
 }
