@@ -15,8 +15,8 @@ import (
 
 // オプション
 var (
-	orderPath string
-	mergePath string
+	mergeOrderPath string
+	mergeOutputPath string
 )
 
 var mergeCmd = &cobra.Command{
@@ -24,10 +24,10 @@ var mergeCmd = &cobra.Command{
 	Short: "Merge JSONL files according",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		orders, err := makeMergeOrder(orderPath)
+		orders, err := makeMergeOrder(mergeOrderPath)
 
 		if err != nil {
-			return fmt.Errorf("nothing order %s: %w", orderPath, err)
+			return fmt.Errorf("nothing order %s: %w", mergeOrderPath, err)
 		}
 
 		mergeData, err := makeMergeData(orders)
@@ -36,9 +36,9 @@ var mergeCmd = &cobra.Command{
 		}
 
 		// これより出力処理
-		outFile, err := os.Create(mergePath)
+		outFile, err := os.Create(mergeOutputPath)
 		if err != nil {
-			return fmt.Errorf("failed to create %s: %w", mergePath, err)
+			return fmt.Errorf("failed to create %s: %w", mergeOutputPath, err)
 		}
 
 		defer outFile.Close()
@@ -63,8 +63,8 @@ var mergeCmd = &cobra.Command{
 }
 
 func init() {
-	mergeCmd.Flags().StringVar(&orderPath, "input", "merge_order.yml", "input order file")
-	mergeCmd.Flags().StringVar(&mergePath, "output", "merged.jsonl", "output file")
+	mergeCmd.Flags().StringVar(&mergeOrderPath, "input", "merge_order.yml", "input order file")
+	mergeCmd.Flags().StringVar(&mergeOutputPath, "output", "merged.jsonl", "output file")
 	rootCmd.AddCommand(mergeCmd)
 }
 
