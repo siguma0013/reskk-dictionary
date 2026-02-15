@@ -15,7 +15,7 @@ import (
 
 // オプション
 var (
-	mergeOrderPath string
+	mergeOrderPath  string
 	mergeOutputPath string
 )
 

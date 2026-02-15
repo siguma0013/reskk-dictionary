@@ -17,7 +17,7 @@ import (
 
 // sortCmd represents the sort command
 var (
-	isSortCi bool
+	isSortCi  bool
 	isSortFix bool
 )
 
@@ -198,7 +198,7 @@ func sortData(reader io.Reader, orderMap map[rune]int) ([]dictionary.Entry, erro
 
 	// 1行だけなら修正不要のため、離脱
 	if len(records) <= 1 {
-		return nil, nil
+		return records, nil
 	}
 
 	sort.SliceStable(records, func(i, j int) bool {
