@@ -17,7 +17,7 @@ import (
 
 // sortCmd represents the sort command
 var (
-	isSortCi bool
+	isSortCi  bool
 	isSortFix bool
 )
 
