@@ -1,0 +1,3 @@
+reskk-dictionary
+*.jsonl
+!jsonl/**/*.jsonl
