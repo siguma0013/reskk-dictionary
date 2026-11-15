@@ -7,3 +7,4 @@
 
 !*/
 !cmd/**/*.go
+!internal/**/*.go
