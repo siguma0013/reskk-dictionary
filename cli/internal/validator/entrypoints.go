@@ -14,12 +14,12 @@ func validateCharacterReadings(entry model.CharacterEntry) []error {
 	var errs []error
 
 	// 音読みのバリデーション
-	if err := validateYomi(entry.GetOnYomi(), allowOnYomiString); err != nil {
+	if err := validateYomi(entry.OnYomi, allowOnYomiString); err != nil {
 		errs = append(errs, fmt.Errorf("音読みの%w", err))
 	}
 
 	// 訓読みのバリデーション
-	if err := validateYomi(entry.GetKunYomi(), allowYomiString); err != nil {
+	if err := validateYomi(entry.KunYomi, allowYomiString); err != nil {
 		errs = append(errs, fmt.Errorf("訓読みの%w", err))
 	}
 
@@ -32,7 +32,7 @@ func ValidateWords(words model.Words, filePath string) []error {
 
 func validateWordReadings(entry model.WordEntry) []error {
 	// 読みのバリデーション
-	if err := validateYomi(entry.GetYomi(), allowYomiString); err != nil {
+	if err := validateYomi(entry.Yomi, allowYomiString); err != nil {
 		return []error{fmt.Errorf("読みの%w", err)}
 	}
 
