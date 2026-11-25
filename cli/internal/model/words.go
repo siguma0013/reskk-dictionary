@@ -7,27 +7,22 @@ type Words struct {
 
 // WordEntry : 熟語用辞書の1単語を表現するデータモデル
 type WordEntry struct {
-	kanji string   `yaml:"漢字"`
-	yomi  []string `yaml:"読み"`
+	Kanji string   `yaml:"漢字"`
+	Yomi  []string `yaml:"読み"`
 }
 
 // GetKanji : 熟語用辞書の漢字getter実装
 func (e WordEntry) GetKanji() string {
-	return e.kanji
+	return e.Kanji
 }
 
-// GetYomi : 熟語用辞書の読みgetter実装
-func (e WordEntry) GetYomi() []string {
-	return e.yomi
-}
-
-// GetIndexReading : 熟語用辞書の代表読みgetter実装
+// GetIndexYomi : 熟語用辞書の代表読みgetter実装
 func (e WordEntry) GetIndexYomi() string {
-	if len(e.yomi) == 0 {
+	if len(e.Yomi) == 0 {
 		return ""
 	}
 
-	return e.yomi[0]
+	return e.Yomi[0]
 }
 
 // GetIndexKey : 熟語用辞書の索引文字getter実装

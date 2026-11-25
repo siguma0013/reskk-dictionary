@@ -7,34 +7,24 @@ type Characters struct {
 
 // CharacterEntry : 単漢字用辞書の1漢字を表現するデータモデル
 type CharacterEntry struct {
-	kanji   string   `yaml:"漢字"`
-	onYomi  []string `yaml:"音読み"`
-	kunYomi []string `yaml:"訓読み"`
+	Kanji   string   `yaml:"漢字"`
+	OnYomi  []string `yaml:"音読み"`
+	KunYomi []string `yaml:"訓読み"`
 }
 
 // GetKanji : 単漢字用辞書の漢字getter実装
 func (e CharacterEntry) GetKanji() string {
-	return e.kanji
+	return e.Kanji
 }
 
-// GetOnYomi : 単漢字用辞書の音読みgetter実装
-func (e CharacterEntry) GetOnYomi() []string {
-	return e.onYomi
-}
-
-// GetKunYomi : 単漢字辞書の訓読みgetter実装
-func (e CharacterEntry) GetKunYomi() []string {
-	return e.kunYomi
-}
-
-// GetIndexReading : 単漢字用辞書の代表読みgetter実装
+// GetIndexYomi : 単漢字用辞書の代表読みgetter実装
 func (e CharacterEntry) GetIndexYomi() string {
-	if len(e.onYomi) > 0 {
-		return e.onYomi[0]
+	if len(e.OnYomi) > 0 {
+		return e.OnYomi[0]
 	}
 
-	if len(e.kunYomi) > 0 {
-		return e.kunYomi[0]
+	if len(e.KunYomi) > 0 {
+		return e.KunYomi[0]
 	}
 
 	return ""
