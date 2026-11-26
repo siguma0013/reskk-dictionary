@@ -96,3 +96,22 @@ func TestLoadYamlErrors(t *testing.T) {
 		}
 	})
 }
+
+func TestSaveYamlRoundTrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "out.yaml")
+	want := model.Words{Entries: []model.WordEntry{
+		{Kanji: "市場", Yomi: []string{"いちば", "しじょう"}},
+	}}
+
+	if err := SaveYaml(path, want); err != nil {
+		t.Fatalf("SaveYaml() error = %v", err)
+	}
+
+	got, err := LoadYaml[model.Words](path)
+	if err != nil {
+		t.Fatalf("LoadYaml() error = %v", err)
+	}
+	if len(got.Entries) != 1 || got.Entries[0].Kanji != "市場" || len(got.Entries[0].Yomi) != 2 {
+		t.Errorf("round trip = %+v, want %+v", got, want)
+	}
+}

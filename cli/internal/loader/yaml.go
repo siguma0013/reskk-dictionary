@@ -31,3 +31,25 @@ func LoadYaml[T any](path string) (T, error) {
 
 	return result, nil
 }
+
+// SaveYaml : データモデルをYAMLファイルへ書き出す
+func SaveYaml[T any](path string, data T) error {
+	var buf bytes.Buffer
+
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2)
+
+	if err := encoder.Encode(data); err != nil {
+		return fmt.Errorf("failed to encode YAML: %w", err)
+	}
+
+	if err := encoder.Close(); err != nil {
+		return fmt.Errorf("failed to encode YAML: %w", err)
+	}
+
+	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return nil
+}
