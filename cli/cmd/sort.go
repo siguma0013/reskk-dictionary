@@ -38,11 +38,23 @@ var sortCmd = &cobra.Command{
 		}
 
 		if dicType == loader.CharacterDictionary {
-			return sortCharacterDictionary(absPath)
+			if err := sortCharacterDictionary(absPath); err != nil {
+				return err
+			}
+
+			cmd.Printf("ソート完了: %s\n", path)
+
+			return nil
 		}
 
 		if dicType == loader.WordDictionary {
-			return sortWordDictionary(absPath)
+			if err := sortWordDictionary(absPath); err != nil {
+				return err
+			}
+
+			cmd.Printf("ソート完了: %s\n", path)
+
+			return nil
 		}
 
 		return nil

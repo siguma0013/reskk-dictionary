@@ -47,11 +47,23 @@ to quickly create a Cobra application.`,
 		}
 
 		if dicType == loader.CharacterDictionary {
-			return processCaracterDictionary(absPath)
+			if err := processCaracterDictionary(absPath); err != nil {
+				return err
+			}
+
+			cmd.Printf("テスト完了: %s\n", path)
+
+			return nil
 		}
 
 		if dicType == loader.WordDictionary {
-			return processWordDictionary(absPath)
+			if err := processWordDictionary(absPath); err != nil {
+				return err
+			}
+
+			cmd.Printf("テスト完了: %s\n", path)
+
+			return nil
 		}
 
 		return nil
