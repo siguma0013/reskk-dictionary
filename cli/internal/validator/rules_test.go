@@ -168,10 +168,10 @@ func TestIsValidString(t *testing.T) {
 			want:         true,
 		},
 		{
-			name:         "空文字列は許可文字列で構成されていると判定される",
+			name:         "空文字列は許可文字列で構成されていると判定されない",
 			value:        "",
 			allowStrings: allowOnYomiString,
-			want:         true,
+			want:         false,
 		},
 	}
 

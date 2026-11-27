@@ -163,6 +163,11 @@ const allowYomiString = allowOnYomiString +
 
 // isValidString : 文字列が許可された文字列で構成されているか判定する
 func isValidString(value string, allowStrings string) bool {
+	// 空文字を許可しない
+	if value == "" {
+		return false
+	}
+
 	for _, rune := range value {
 		if !strings.ContainsRune(allowStrings, rune) {
 			return false
