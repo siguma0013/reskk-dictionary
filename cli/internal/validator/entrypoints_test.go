@@ -9,7 +9,7 @@ import (
 
 func TestValidateCharacters(t *testing.T) {
 	t.Run("エントリがない単漢字辞書は確認を通る", func(t *testing.T) {
-		errs := ValidateCharacters(model.Characters{}, "/dictionary/常用漢字/01-a.yaml")
+		errs := ValidateCharacters(model.Characters{}, "/dictionary/常用漢字/01-あ.yaml")
 		if len(errs) != 0 {
 			t.Errorf("ValidateCharacters() errors = %v, want no errors", errs)
 		}
@@ -31,7 +31,7 @@ func TestValidateCharacters(t *testing.T) {
 
 func TestValidateWords(t *testing.T) {
 	t.Run("エントリがない熟語辞書は確認を通る", func(t *testing.T) {
-		errs := ValidateWords(model.Words{}, "/dictionary/二字熟語/11-ka.yaml")
+		errs := ValidateWords(model.Words{}, "/dictionary/二字熟語/11-か.yaml")
 		if len(errs) != 0 {
 			t.Errorf("ValidateWords() errors = %v, want no errors", errs)
 		}

@@ -14,7 +14,7 @@ func TestValidateEntries(t *testing.T) {
 			{kanji: "市場", indexYomi: "かいば", indexKey: "か"},
 		}
 
-		errs := validateEntries(entries, "/dictionary/二字熟語/11-ka.yaml", func(testEntry) []error {
+		errs := validateEntries(entries, "/dictionary/二字熟語/11-か.yaml", func(testEntry) []error {
 			return nil
 		})
 
@@ -50,7 +50,7 @@ func TestValidateEntries(t *testing.T) {
 			{kanji: "市場", indexYomi: "がいじょう", indexKey: "が"},
 		}
 
-		errs := validateEntries(entries, "/dictionary/二字熟語/11-ka.yaml", func(testEntry) []error {
+		errs := validateEntries(entries, "/dictionary/二字熟語/11-か.yaml", func(testEntry) []error {
 			return nil
 		})
 
@@ -64,7 +64,7 @@ func TestValidateEntries(t *testing.T) {
 			{kanji: "市場", indexYomi: "", indexKey: ""},
 		}
 
-		errs := validateEntries(entries, "/dictionary/二字熟語/11-ka.yaml", func(testEntry) []error {
+		errs := validateEntries(entries, "/dictionary/二字熟語/11-か.yaml", func(testEntry) []error {
 			return []error{errors.New("文字種が不正です")}
 		})
 
@@ -78,7 +78,7 @@ func TestValidateEntries(t *testing.T) {
 			{kanji: "市場", indexYomi: "しじょう", indexKey: "し"},
 		}
 
-		errs := validateEntries(entries, "/dictionary/二字熟語/11-ka.yaml", func(testEntry) []error {
+		errs := validateEntries(entries, "/dictionary/二字熟語/11-か.yaml", func(testEntry) []error {
 			return nil
 		})
 

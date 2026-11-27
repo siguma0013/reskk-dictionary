@@ -34,12 +34,12 @@ func TestGetIndexKeys(t *testing.T) {
 	}{
 		{
 			name:     "あ行のファイル名から「あ」の索引文字を取得できる",
-			filePath: "/dictionary/あ/01-a.yaml",
+			filePath: "/dictionary/あ/01-あ.yaml",
 			want:     []string{"あ"},
 		},
 		{
 			name:     "濁音を含むファイル名から複数の索引文字を取得できる",
-			filePath: "/dictionary/か/11-ka.yaml",
+			filePath: "/dictionary/か/11-か.yaml",
 			want:     []string{"か", "が"},
 		},
 		{
@@ -74,27 +74,27 @@ func TestGetKanjiLength(t *testing.T) {
 	}{
 		{
 			name:     "常用漢字ディレクトリでは文字列長1を取得できる",
-			filePath: "/dictionary/常用漢字/01-a.yaml",
+			filePath: "/dictionary/常用漢字/01-あ.yaml",
 			want:     1,
 		},
 		{
 			name:     "二字熟語ディレクトリでは文字列長2を取得できる",
-			filePath: "/dictionary/二字熟語/11-ka.yaml",
+			filePath: "/dictionary/二字熟語/11-か.yaml",
 			want:     2,
 		},
 		{
 			name:     "三字熟語ディレクトリでは文字列長3を取得できる",
-			filePath: "/dictionary/三字熟語/21-sa.yaml",
+			filePath: "/dictionary/三字熟語/21-さ.yaml",
 			want:     3,
 		},
 		{
 			name:     "四字熟語ディレクトリでは文字列長4を取得できる",
-			filePath: "/dictionary/四字熟語/31-ta.yaml",
+			filePath: "/dictionary/四字熟語/31-た.yaml",
 			want:     4,
 		},
 		{
 			name:     "管理対象外のディレクトリではエラーになる",
-			filePath: "/dictionary/五字熟語/41-na.yaml",
+			filePath: "/dictionary/五字熟語/41-な.yaml",
 			wantErr:  true,
 		},
 	}
