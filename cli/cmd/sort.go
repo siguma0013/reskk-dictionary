@@ -76,6 +76,10 @@ func sortCharacterDictionary(path string) error {
 		return errors.Join(errs...)
 	}
 
+	if filepath.Base(filepath.Dir(path)) == "常用漢字" {
+		return fmt.Errorf("常用漢字はソート対象外です")
+	}
+
 	data.Entries = sorter.SortEntries(data.Entries)
 
 	return loader.SaveYaml(path, data)
