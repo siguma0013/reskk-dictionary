@@ -99,6 +99,9 @@ func TestLoadYamlErrors(t *testing.T) {
 
 func TestSaveYamlRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "out.yaml")
+	if err := os.WriteFile(path, []byte("old content"), 0o600); err != nil {
+		t.Fatalf("テスト用ファイルの作成に失敗: %v", err)
+	}
 	want := model.Words{Entries: []model.WordEntry{
 		{Kanji: "市場", Yomi: []string{"いちば", "しじょう"}},
 	}}
@@ -113,5 +116,34 @@ func TestSaveYamlRoundTrip(t *testing.T) {
 	}
 	if len(got.Entries) != 1 || got.Entries[0].Kanji != "市場" || len(got.Entries[0].Yomi) != 2 {
 		t.Errorf("round trip = %+v, want %+v", got, want)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("保存後のファイル情報取得に失敗: %v", err)
+	}
+	if got, want := info.Mode().Perm(), os.FileMode(0o600); got != want {
+		t.Errorf("保存後の権限 = %04o, want %04o", got, want)
+	}
+}
+
+func TestSaveYamlReplaceFailureKeepsOriginal(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "target.yaml")
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatalf("テスト用ディレクトリの作成に失敗: %v", err)
+	}
+
+	err := SaveYaml(path, model.Words{})
+	if err == nil {
+		t.Fatal("SaveYaml() error = nil, want error")
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ディレクトリ読み込みに失敗: %v", err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "target.yaml" || !entries[0].IsDir() {
+		t.Errorf("置換失敗後のディレクトリ内容 = %v, want 元のディレクトリのみ", entries)
 	}
 }
