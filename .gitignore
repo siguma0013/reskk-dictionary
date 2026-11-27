@@ -1,3 +1,10 @@
-reskk-dictionary
-*.jsonl
-!jsonl/**/*.jsonl
+*
+
+!.editorconfig
+!.gitignore
+!mise.toml
+
+!*/
+!.github/*
+!cli/*
+!doc/**/*.md
