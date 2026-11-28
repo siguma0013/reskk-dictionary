@@ -6,15 +6,8 @@ import (
 	"siguma0013/reskk-dictionary/internal/model"
 )
 
-// validatable : バリデーションに必要なメソッドのみを持つ制約
-type validatable interface {
-	model.KanjiGetter
-	model.IndexYomiGetter
-	model.IndexKeyGetter
-}
-
 // バリデーションの基本処理
-func validateEntries[T validatable](entries []T, filePath string, yomiValidator func(T) []error) []error {
+func validateEntries[T model.Entry](entries []T, filePath string, yomiValidator func(T) []error) []error {
 	// 全体のバリデーション結果
 	var errs []error
 

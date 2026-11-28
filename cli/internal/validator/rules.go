@@ -195,10 +195,7 @@ func validateYomi(values []string, allowStrings string) error {
 }
 
 // validateIndex : 代表読み・索引のバリデーションロジック
-func validateIndex(entry interface {
-	model.IndexYomiGetter
-	model.IndexKeyGetter
-}, profile []string) error {
+func validateIndex(entry model.Entry, profile []string) error {
 	// 必須チェック
 	if entry.GetIndexYomi() == "" {
 		return fmt.Errorf("読みは1つ以上必要です")
