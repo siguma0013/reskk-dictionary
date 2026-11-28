@@ -38,3 +38,8 @@ func (e WordEntry) GetIndexKey() string {
 	// 代表読みの頭文字を索引文字として返却
 	return string([]rune(reading)[0])
 }
+
+// GetYomi : 熟語用辞書の全読みgetter実装
+func (e WordEntry) GetYomi() []string {
+	return e.Yomi
+}

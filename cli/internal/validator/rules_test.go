@@ -7,7 +7,9 @@ import (
 	"siguma0013/reskk-dictionary/internal/model"
 )
 
+// testEntry : 未実装のメソッドは埋め込みのEntry(nil)に委譲されるため、テストで使うメソッドだけ実装する
 type testEntry struct {
+	model.Entry
 	kanji     string
 	indexYomi string
 	indexKey  string
@@ -229,6 +231,4 @@ func TestValidateIndex(t *testing.T) {
 			t.Errorf("validateIndex() error = %v, want 索引が正しくありません", err)
 		}
 	})
-
-	var _ model.Entry = testEntry{}
 }
