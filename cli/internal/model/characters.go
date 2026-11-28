@@ -44,8 +44,8 @@ func (e CharacterEntry) GetIndexKey() string {
 	return string([]rune(reading)[0])
 }
 
-// GetYomis : 単漢字用辞書の全読み(音読み、訓読みの順)getter実装
-func (e CharacterEntry) GetYomis() []string {
+// GetYomi : 単漢字用辞書の全読み(音読み、訓読みの順)getter実装
+func (e CharacterEntry) GetYomi() []string {
 	yomis := make([]string, 0, len(e.OnYomi)+len(e.KunYomi))
 	yomis = append(yomis, e.OnYomi...)
 

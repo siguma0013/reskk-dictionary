@@ -6,9 +6,9 @@ type KanjiGetter interface {
 	GetKanji() string
 }
 
-// YomisGetter : 全ての読みを取得できるインターフェース
-type YomisGetter interface {
-	GetYomis() []string
+// YomiGetter : 全ての読みを取得できるインターフェース
+type YomiGetter interface {
+	GetYomi() []string
 }
 
 // IndexYomiGetter : 代表読みを取得できるインターフェース
@@ -25,7 +25,7 @@ type IndexKeyGetter interface {
 // 利用側は必要なメソッドだけを持つ小さなインターフェースを受け取る
 type Entry interface {
 	KanjiGetter
-	YomisGetter
+	YomiGetter
 	IndexYomiGetter
 	IndexKeyGetter
 }

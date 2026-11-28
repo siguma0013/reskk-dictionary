@@ -39,7 +39,7 @@ func (e WordEntry) GetIndexKey() string {
 	return string([]rune(reading)[0])
 }
 
-// GetYomis : 熟語用辞書の全読みgetter実装
-func (e WordEntry) GetYomis() []string {
+// GetYomi : 熟語用辞書の全読みgetter実装
+func (e WordEntry) GetYomi() []string {
 	return e.Yomi
 }
