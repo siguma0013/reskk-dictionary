@@ -16,6 +16,13 @@ func NewDictionary() Dictionary {
 	return Dictionary{}
 }
 
+// AddEntry : 辞書Entryの全ての読みに対して漢字を出現順で追加する
+func (d Dictionary) AddEntry(entry Entry) {
+	for _, yomi := range entry.GetYomis() {
+		d[yomi] = append(d[yomi], entry.GetKanji())
+	}
+}
+
 // Merge : 別のDictionaryの内容を、候補の順序を維持して追加する
 func (d Dictionary) Merge(other Dictionary) {
 	for _, yomi := range other.Yomis() {
