@@ -7,18 +7,10 @@ import (
 
 func TestDictionaryEncode(t *testing.T) {
 	t.Run("読みごとにまとめ、キー昇順で出力する", func(t *testing.T) {
-		d := NewDictionary()
-		for _, e := range []CharacterEntry{
-			{Kanji: "愛", OnYomi: []string{"あい"}},
-			{Kanji: "青", KunYomi: []string{"あお"}},
-		} {
-			d.AddEntry(e)
-		}
-		for _, e := range []WordEntry{
-			{Kanji: "藍", Yomi: []string{"あい"}},
-			{Kanji: "橋", Yomi: []string{"はし"}},
-		} {
-			d.AddEntry(e)
+		d := Dictionary{
+			"はし": {"橋"},
+			"あお": {"青"},
+			"あい": {"愛", "藍"},
 		}
 
 		var buf bytes.Buffer

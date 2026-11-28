@@ -16,18 +16,6 @@ func NewDictionary() Dictionary {
 	return Dictionary{}
 }
 
-// Add : 読みに対する変換候補を出現順で追加する
-func (d Dictionary) Add(yomi, kanji string) {
-	d[yomi] = append(d[yomi], kanji)
-}
-
-// AddEntry : 辞書Entryの全ての読みに対して漢字を追加する
-func (d Dictionary) AddEntry(entry Entry) {
-	for _, yomi := range entry.GetYomis() {
-		d.Add(yomi, entry.GetKanji())
-	}
-}
-
 // Merge : 別のDictionaryの内容を、候補の順序を維持して追加する
 func (d Dictionary) Merge(other Dictionary) {
 	for _, yomi := range other.Yomis() {
