@@ -4,6 +4,7 @@ package model
 // Entry : 辞書Entryのインターフェース
 type Entry interface {
 	GetKanji() string
+	GetYomis() []string
 	GetIndexYomi() string
 	GetIndexKey() string
 }

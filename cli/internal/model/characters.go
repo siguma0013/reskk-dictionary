@@ -43,3 +43,11 @@ func (e CharacterEntry) GetIndexKey() string {
 	// 代表読みの頭文字を索引文字として返却
 	return string([]rune(reading)[0])
 }
+
+// GetYomis : 単漢字用辞書の全読み(音読み、訓読みの順)getter実装
+func (e CharacterEntry) GetYomis() []string {
+	yomis := make([]string, 0, len(e.OnYomi)+len(e.KunYomi))
+	yomis = append(yomis, e.OnYomi...)
+
+	return append(yomis, e.KunYomi...)
+}
