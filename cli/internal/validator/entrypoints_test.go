@@ -96,3 +96,33 @@ func TestValidatedEntriesProduceNonNilDictionaryCandidates(t *testing.T) {
 		}
 	})
 }
+
+func TestValidateEmptyReadingsAreRejected(t *testing.T) {
+	cases := []struct {
+		name string
+		errs func() []error
+		want string
+	}{
+		{"単漢字: 読みなし", func() []error {
+			return ValidateCharacters(model.Characters{Entries: []model.CharacterEntry{{Kanji: "愛"}}}, "/dictionary/常用漢字/01-あ.yaml")
+		}, "読みは1つ以上必要です"},
+		{"単漢字: 空文字の読み", func() []error {
+			return ValidateCharacters(model.Characters{Entries: []model.CharacterEntry{{Kanji: "愛", OnYomi: []string{""}}}}, "/dictionary/常用漢字/01-あ.yaml")
+		}, "文字種が不正です"},
+		{"熟語: 読みなし", func() []error {
+			return ValidateWords(model.Words{Entries: []model.WordEntry{{Kanji: "会話"}}}, "/dictionary/二字熟語/11-か.yaml")
+		}, "読みは1つ以上必要です"},
+		{"熟語: 空文字の読み", func() []error {
+			return ValidateWords(model.Words{Entries: []model.WordEntry{{Kanji: "会話", Yomi: []string{""}}}}, "/dictionary/二字熟語/11-か.yaml")
+		}, "文字種が不正です"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			errs := tc.errs()
+			if len(errs) != 1 || !strings.Contains(errs[0].Error(), tc.want) {
+				t.Errorf("errors = %v, want one error containing %q", errs, tc.want)
+			}
+		})
+	}
+}
