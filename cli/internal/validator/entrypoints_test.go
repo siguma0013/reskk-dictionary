@@ -50,3 +50,49 @@ func TestValidateWords(t *testing.T) {
 		}
 	})
 }
+
+func TestValidatedEntriesProduceNonNilDictionaryCandidates(t *testing.T) {
+	t.Run("単漢字", func(t *testing.T) {
+		entries := model.Characters{Entries: []model.CharacterEntry{
+			{Kanji: "愛", OnYomi: []string{"あい"}},
+		}}
+		if errs := ValidateCharacters(entries, "/dictionary/常用漢字/01-あ.yaml"); len(errs) > 0 {
+			t.Fatalf("ValidateCharacters() errors = %v", errs)
+		}
+
+		dict := model.Dictionary{}
+		for _, entry := range entries.Entries {
+			dict.AddEntry(entry)
+		}
+		for yomi, candidates := range dict {
+			if candidates == nil {
+				t.Errorf("nil candidates for reading %q", yomi)
+			}
+		}
+		if got := dict["あい"]; len(got) != 1 || got[0] != "愛" {
+			t.Errorf("dictionary candidates for あい = %v, want [愛]", got)
+		}
+	})
+
+	t.Run("熟語", func(t *testing.T) {
+		entries := model.Words{Entries: []model.WordEntry{
+			{Kanji: "会話", Yomi: []string{"かいわ"}},
+		}}
+		if errs := ValidateWords(entries, "/dictionary/二字熟語/11-か.yaml"); len(errs) > 0 {
+			t.Fatalf("ValidateWords() errors = %v", errs)
+		}
+
+		dict := model.Dictionary{}
+		for _, entry := range entries.Entries {
+			dict.AddEntry(entry)
+		}
+		for yomi, candidates := range dict {
+			if candidates == nil {
+				t.Errorf("nil candidates for reading %q", yomi)
+			}
+		}
+		if got := dict["かいわ"]; len(got) != 1 || got[0] != "会話" {
+			t.Errorf("dictionary candidates for かいわ = %v, want [会話]", got)
+		}
+	})
+}
