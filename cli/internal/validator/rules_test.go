@@ -1,9 +1,10 @@
 package validator
 
 import (
-	"siguma0013/reskk-dictionary/internal/model"
 	"strings"
 	"testing"
+
+	"siguma0013/reskk-dictionary/internal/model"
 )
 
 // testEntry : 未実装のメソッドは埋め込みのEntry(nil)に委譲されるため、テストで使うメソッドだけ実装する

@@ -2,8 +2,9 @@ package sorter
 
 import (
 	"reflect"
-	"siguma0013/reskk-dictionary/internal/model"
 	"testing"
+
+	"siguma0013/reskk-dictionary/internal/model"
 )
 
 // testEntry : 未実装のメソッドは埋め込みのEntry(nil)に委譲されるため、テストで使うメソッドだけ実装する
