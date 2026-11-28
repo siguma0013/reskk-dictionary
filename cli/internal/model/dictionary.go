@@ -5,7 +5,10 @@ package model
 type Dictionary map[string][]string
 
 // AddEntry : 辞書Entryの全ての読みに対して漢字を出現順で追加する
-func (d Dictionary) AddEntry(entry Entry) {
+func (d Dictionary) AddEntry(entry interface {
+	KanjiGetter
+	YomisGetter
+}) {
 	for _, yomi := range entry.GetYomis() {
 		d[yomi] = append(d[yomi], entry.GetKanji())
 	}

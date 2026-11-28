@@ -15,10 +15,6 @@ func (e testEntry) GetKanji() string {
 	return e.kanji
 }
 
-func (e testEntry) GetYomis() []string {
-	return []string{e.indexYomi}
-}
-
 func (e testEntry) GetIndexYomi() string {
 	return e.indexYomi
 }

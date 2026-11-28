@@ -3,8 +3,6 @@ package validator
 import (
 	"strings"
 	"testing"
-
-	"siguma0013/reskk-dictionary/internal/model"
 )
 
 type testEntry struct {
@@ -15,10 +13,6 @@ type testEntry struct {
 
 func (e testEntry) GetKanji() string {
 	return e.kanji
-}
-
-func (e testEntry) GetYomis() []string {
-	return []string{e.indexYomi}
 }
 
 func (e testEntry) GetIndexYomi() string {
@@ -233,6 +227,4 @@ func TestValidateIndex(t *testing.T) {
 			t.Errorf("validateIndex() error = %v, want 索引が正しくありません", err)
 		}
 	})
-
-	var _ model.Entry = testEntry{}
 }
